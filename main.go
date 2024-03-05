@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/fahimfaiaal/go/queue"
+	"github.com/fahimfaisaal/go/queue"
 )
 
 func main() {
