@@ -15,7 +15,7 @@ func New[T any](concurrency uint, processor func(T)) *Queue[T] {
 	channels := make([]chan T, concurrency)
 	wg := sync.WaitGroup{}
 
-	for i := uint(0); i < concurrency; i++ {
+	for i := range concurrency {
 		channels[i] = make(chan T)
 
 		wg.Add(1)
