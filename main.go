@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"net/http"
+	"sync"
+	"time"
 
 	"github.com/fahimfaiaal/go/queue"
 )
@@ -19,7 +22,12 @@ func main() {
 
 		fmt.Printf("The status code is: %d\n", res.StatusCode)
 	})
+	q2 := queue.New[float32](5, func(rand float32) {
+		time.Sleep(time.Duration(int(rand)) * time.Second)
+		fmt.Printf("Wait random time: %f\n", rand)
+	})
 	defer q.Close()
+	defer q2.Close()
 
 	links := []string{
 		"https://www.google.com",
@@ -34,7 +42,28 @@ func main() {
 		"https://www.youtube.com",
 	}
 
-	for _, link := range links {
-		q.Add(link)
-	}
+	wg := sync.WaitGroup{}
+
+	wg.Add(1)
+	go func() {
+		for _, link := range links {
+			fmt.Println("Added link to queue")
+			q.Add(link)
+		}
+		wg.Done()
+		fmt.Println("All links added to queue")
+	}()
+
+	wg.Add(1)
+	go func() {
+		for i := 0; i < 10; i++ {
+			fmt.Println("Add random time")
+			q2.Add(rand.Float32() * 10)
+		}
+
+		wg.Done()
+		fmt.Println("All random number added to queue")
+	}()
+
+	wg.Wait()
 }

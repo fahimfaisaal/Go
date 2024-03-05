@@ -1,33 +1,38 @@
 package queue
 
-type Queue[T interface{}] struct {
+import (
+	"sync"
+)
+
+type Queue[T any] struct {
 	concurrency  uint
 	channels     []chan T
 	channelIndex uint
+	wg           *sync.WaitGroup
 }
 
-func New[T interface{}](concurrency uint, processor func(T)) *Queue[T] {
+func New[T any](concurrency uint, processor func(T)) *Queue[T] {
 	channels := make([]chan T, concurrency)
+	wg := sync.WaitGroup{}
 
 	for i := uint(0); i < concurrency; i++ {
 		channels[i] = make(chan T)
-	}
 
-	for _, channel := range channels {
+		wg.Add(1)
 		go func(channel <-chan T) {
+			defer wg.Done()
 			for item := range channel {
 				processor(item)
 			}
-		}(channel)
+		}(channels[i])
 	}
 
-	return &Queue[T]{concurrency, channels, 0}
+	return &Queue[T]{concurrency, channels, 0, &wg}
 }
 
 func (q *Queue[T]) getNextChannel() chan<- T {
 	channel := q.channels[q.channelIndex]
 	q.channelIndex = (q.channelIndex + 1) % q.concurrency
-
 	return channel
 }
 
@@ -36,6 +41,7 @@ func (q *Queue[T]) Add(item T) {
 }
 
 func (q *Queue[T]) Close() {
+	defer q.wg.Wait()
 	for _, channel := range q.channels {
 		close(channel)
 	}
