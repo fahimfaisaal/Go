@@ -11,7 +11,7 @@ type Queue[T any] struct {
 
 func New[T any](concurrency uint, processor func(T)) *Queue[T] {
 	channels := make([]chan T, concurrency)
-	wg := sync.WaitGroup{}
+	wg := new(sync.WaitGroup)
 
 	for i := range concurrency {
 		channels[i] = make(chan T)
@@ -25,7 +25,7 @@ func New[T any](concurrency uint, processor func(T)) *Queue[T] {
 		}(channels[i])
 	}
 
-	return &Queue[T]{concurrency, channels, 0, &wg}
+	return &Queue[T]{concurrency, channels, 0, wg}
 }
 
 func (q *Queue[T]) getNextChannel() chan<- T {
