@@ -1,8 +1,6 @@
 package queue
 
-import (
-	"sync"
-)
+import "sync"
 
 type Queue[T any] struct {
 	concurrency  uint
