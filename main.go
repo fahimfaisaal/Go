@@ -104,7 +104,7 @@ func runServer() {
 		w.Write([]byte("Hello, world!"))
 	})
 
-	// http://localhost:4000/cpu-tasks/compute?n=10000000000
+	// http://localhost:4000/cpu-task/compute?n=10000000000
 	r.Get("/cpu-task/compute", func(w http.ResponseWriter, r *http.Request) {
 		n, err := strconv.ParseUint(r.URL.Query().Get("n"), 10, 64)
 
