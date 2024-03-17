@@ -174,7 +174,7 @@ func runServer() {
 }
 
 func main() {
-	if s.Contains(os.Args[1:], "server") {
+	if s.Contains(os.Args[1:], "server") || os.Getenv("TYPE") == "server" {
 		runServer()
 	} else {
 		runTasks()
